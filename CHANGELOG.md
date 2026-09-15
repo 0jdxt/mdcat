@@ -8,6 +8,8 @@ Use `cargo release` to create a new release.
 
 ## [Unreleased]
 
+## [2.17.0] – 2026-09-15
+
 ### Added
 - Paginating through [lessi](https://github.com/roblillack/lessi) (a `less` replacement that
   understands the kitty/Sixel graphics protocols) keeps normal terminal detection and inline
@@ -1093,7 +1095,8 @@ Use `cargo release` to create a new release.
 - Support ordered and unordered lists, with nest.
 - Show links, with references grouped by section.
 
-[Unreleased]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.16.1...HEAD
+[Unreleased]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.17.0...HEAD
+[2.17.0]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.16.1...mdcat-2.17.0
 [2.16.1]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.16.0...mdcat-2.16.1
 [2.16.0]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.15.0...mdcat-2.16.0
 [2.15.0]: https://github.com/BIRSAx2/mdcat/compare/mdcat-2.14.0...mdcat-2.15.0
