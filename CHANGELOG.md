@@ -8,6 +8,12 @@ Use `cargo release` to create a new release.
 
 ## [Unreleased]
 
+### Added
+- `--emoji`/`defaults.emoji` in `~/.config/mdcat/config.toml` renders GitHub-style emoji
+  shortcodes (e.g. `:+1:`) as Unicode emoji, using the same shortcode names GitHub uses. Off by
+  default, to avoid silently changing existing output. Shortcodes inside code spans and code
+  blocks are left untouched (see [#50]).
+
 ## [2.17.0] – 2026-09-15
 
 ### Added
@@ -53,6 +59,7 @@ Use `cargo release` to create a new release.
 [#43]: https://github.com/BIRSAx2/mdcat/issues/43
 [#45]: https://github.com/BIRSAx2/mdcat/issues/45
 [#48]: https://github.com/BIRSAx2/mdcat/issues/48
+[#50]: https://github.com/BIRSAx2/mdcat/issues/50
 
 ## [2.15.0] – 2026-08-03
 

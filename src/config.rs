@@ -39,6 +39,8 @@ pub struct Defaults {
     pub margin: Option<bool>,
     /// Default for `--smart-punctuation`.
     pub smart_punctuation: Option<bool>,
+    /// Default for `--emoji`.
+    pub emoji: Option<bool>,
     /// Default for `--columns`.
     pub columns: Option<u16>,
     /// Default for `--full-width`.
@@ -469,6 +471,7 @@ mod tests {
         let config: Config = toml::from_str("").unwrap();
         assert_eq!(config.defaults.margin, None);
         assert_eq!(config.defaults.smart_punctuation, None);
+        assert_eq!(config.defaults.emoji, None);
         assert_eq!(config.defaults.columns, None);
         assert_eq!(config.defaults.full_width, None);
         assert_eq!(config.defaults.local_only, None);

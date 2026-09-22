@@ -217,6 +217,11 @@ pub struct CommonArgs {
     /// `~/.config/mdcat/config.toml`.
     #[arg(long)]
     pub smart_punctuation: bool,
+    /// Render GitHub-style emoji shortcodes (e.g. `:+1:`) as Unicode emoji. Off by default, to
+    /// avoid silently changing existing output. Also settable via `defaults.emoji` in
+    /// `~/.config/mdcat/config.toml`.
+    #[arg(long)]
+    pub emoji: bool,
     /// Print a sample rendered with every built-in theme, to help pick one, and exit.
     #[arg(long)]
     pub list_themes: bool,

@@ -23,7 +23,7 @@ use pulldown_cmark_mdcat::resources::{
     DispatchingResourceHandler, FileResourceHandler, ResourceUrlHandler,
 };
 use pulldown_cmark_mdcat::{
-    expand_tabs, markdown_options, strip_frontmatter, Environment, Settings,
+    expand_tabs, markdown_options, strip_frontmatter, substitute_emoji, Environment, Settings,
 };
 use resources::CurlResourceHandler;
 use tracing::{event, instrument, Level};
@@ -128,6 +128,8 @@ pub struct RenderOptions {
     /// Render typographic punctuation (curly quotes, en/em dashes, ellipsis) instead of the
     /// literal input characters.
     pub smart_punctuation: bool,
+    /// Render GitHub-style `:emoji:` shortcodes as Unicode emoji.
+    pub emoji: bool,
     /// Prepend a table of contents generated from the document's headings.
     ///
     /// On standard input (`filename` is `-`) its entries are plain text, since there is no file
@@ -177,6 +179,11 @@ pub fn process_file(
     let parser = toc_events
         .into_iter()
         .chain(Parser::new_ext(input, options));
+    let parser: Box<dyn Iterator<Item = pulldown_cmark::Event>> = if render_options.emoji {
+        Box::new(substitute_emoji(parser))
+    } else {
+        Box::new(parser)
+    };
     let env = Environment::for_local_directory(&base_dir)?;
 
     let ignore_broken_pipe = |error: io::Error| {

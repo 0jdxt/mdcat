@@ -167,6 +167,9 @@ Defaults to `auto`, which detects dark or light mode from the terminal, unless `
 [[smart-punctuation-option]]--smart-punctuation::
     Render typographic punctuation: straight quotes become curly, `--`/`---` become en/em dashes, and `...` becomes an ellipsis.
 
+[[emoji-option]]--emoji::
+    Render GitHub-style emoji shortcodes (e.g. `:+1:`) as Unicode emoji.
+
 -w::
 --watch::
     Watch the input file and re-render on every change.
@@ -240,6 +243,9 @@ Each key sets the default value for a CLI flag, used only when that flag isn't p
 
 `smart_punctuation`::
     Default for <<smart-punctuation-option,`--smart-punctuation`>>.
+
+`emoji`::
+    Default for <<emoji-option,`--emoji`>>.
 
 `columns`::
     Default for <<columns-option,`--columns`>>.

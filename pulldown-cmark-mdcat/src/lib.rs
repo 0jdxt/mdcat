@@ -46,7 +46,7 @@ use std::io::{Error, ErrorKind, Result, Write};
 use std::path::Path;
 
 use gethostname::gethostname;
-use pulldown_cmark::{Event, Options};
+use pulldown_cmark::{Event, Options, Tag, TagEnd};
 use syntect::highlighting::Theme as SyntectTheme;
 use syntect::parsing::SyntaxSet;
 use tracing::instrument;
@@ -219,6 +219,34 @@ pub fn expand_tabs(input: &str, tab_width: u16) -> std::borrow::Cow<'_, str> {
     std::borrow::Cow::Owned(output)
 }
 
+/// Replace GitHub-style `:emoji:` shortcodes with Unicode emoji in text content.
+///
+/// Only rewrites [`Event::Text`] content, and only outside fenced/indented code blocks; it never
+/// touches [`Event::Code`] (inline code spans), [`Event::Html`], or text inside a
+/// [`Tag::CodeBlock`], so emoji shortcodes in code are always left untouched -- matching GitHub's
+/// own behaviour. Unknown shortcodes (no matching emoji name) are left as-is.
+pub fn substitute_emoji<'e>(
+    events: impl Iterator<Item = Event<'e>> + 'e,
+) -> impl Iterator<Item = Event<'e>> {
+    let replacer = gh_emoji::Replacer::new();
+    let mut code_block_depth = 0u32;
+    events.map(move |event| match event {
+        Event::Start(Tag::CodeBlock(_)) => {
+            code_block_depth += 1;
+            event
+        }
+        Event::End(TagEnd::CodeBlock) => {
+            code_block_depth = code_block_depth.saturating_sub(1);
+            event
+        }
+        Event::Text(text) if code_block_depth == 0 => match replacer.replace_all(&text) {
+            std::borrow::Cow::Borrowed(_) => Event::Text(text),
+            std::borrow::Cow::Owned(s) => Event::Text(s.into()),
+        },
+        other => other,
+    })
+}
+
 /// Write markdown to a TTY.
 ///
 /// Iterate over Markdown AST `events`, format each event for TTY output and
@@ -321,6 +349,43 @@ mod tests {
     #[test]
     fn expand_tabs_handles_consecutive_tabs() {
         assert_eq!(expand_tabs("a\t\tb", 4), "a       b");
+    }
+
+    #[test]
+    fn substitute_emoji_replaces_known_shortcodes_in_text() {
+        let events = vec![Event::Text("Hello :+1: and :smile:!".into())];
+        let result: Vec<_> = substitute_emoji(events.into_iter()).collect();
+        assert_eq!(result, vec![Event::Text("Hello 👍 and 😄!".into())]);
+    }
+
+    #[test]
+    fn substitute_emoji_leaves_unknown_shortcodes_untouched() {
+        let events = vec![Event::Text("before :not_a_real_emoji_xyz: after".into())];
+        let result: Vec<_> = substitute_emoji(events.into_iter()).collect();
+        assert_eq!(
+            result,
+            vec![Event::Text("before :not_a_real_emoji_xyz: after".into())]
+        );
+    }
+
+    #[test]
+    fn substitute_emoji_never_touches_code_events() {
+        let events = vec![Event::Code(":+1:".into())];
+        let result: Vec<_> = substitute_emoji(events.into_iter()).collect();
+        assert_eq!(result, vec![Event::Code(":+1:".into())]);
+    }
+
+    #[test]
+    fn substitute_emoji_never_touches_fenced_code_block_text() {
+        let events = vec![
+            Event::Start(Tag::CodeBlock(pulldown_cmark::CodeBlockKind::Fenced(
+                "".into(),
+            ))),
+            Event::Text(":+1:".into()),
+            Event::End(TagEnd::CodeBlock),
+        ];
+        let result: Vec<_> = substitute_emoji(events.clone().into_iter()).collect();
+        assert_eq!(result, events);
     }
 
     fn render_definition_list(markup: &str) -> Result<String> {

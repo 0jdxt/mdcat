@@ -199,6 +199,50 @@ fn footnote_reference_in_table_cell_does_not_panic() {
     );
 }
 
+fn render_markdown_with_emoji_to_string(
+    markdown: &str,
+    base_dir: &Path,
+    settings: &Settings,
+) -> String {
+    let parser = Parser::new_ext(
+        markdown,
+        Options::ENABLE_TASKLISTS
+            | Options::ENABLE_STRIKETHROUGH
+            | Options::ENABLE_TABLES
+            | Options::ENABLE_FOOTNOTES
+            | Options::ENABLE_MATH,
+    );
+    let parser = pulldown_cmark_mdcat::substitute_emoji(parser);
+    let mut sink = Vec::new();
+    let env = Environment {
+        hostname: "HOSTNAME".to_string(),
+        ..Environment::for_local_directory(&base_dir).unwrap()
+    };
+    pulldown_cmark_mdcat::push_tty(settings, &env, &resource_handler(), &mut sink, parser).unwrap();
+    String::from_utf8(sink).unwrap()
+}
+
+#[test]
+fn emoji_shortcode_renders_when_enabled_but_not_in_code() {
+    let settings = Settings {
+        terminal_capabilities: TerminalProgram::Dumb.capabilities(),
+        terminal_size: TerminalSize::default(),
+        theme: Theme::default(),
+        syntax_set: syntax_set(),
+        syntax_theme: None,
+    };
+    let cwd = std::env::current_dir().expect("Require working directory");
+    let output = render_markdown_with_emoji_to_string(
+        "Thumbs up :+1:\n\n```\ncode block :+1:\n```\n\n`inline code :+1:`\n",
+        &cwd,
+        &settings,
+    );
+
+    assert!(output.contains('\u{1F44D}'));
+    assert!(output.contains("code block :+1:"));
+    assert!(output.contains("inline code :+1:"));
+}
+
 #[test]
 fn inline_math_kitty_placement_does_not_move_cursor() {
     let settings = Settings {

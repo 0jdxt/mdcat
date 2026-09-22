@@ -340,6 +340,7 @@ fn main() {
     let margin = args.margin || defaults.and_then(|d| d.margin).unwrap_or(false);
     let smart_punctuation =
         args.smart_punctuation || defaults.and_then(|d| d.smart_punctuation).unwrap_or(false);
+    let emoji = args.emoji || defaults.and_then(|d| d.emoji).unwrap_or(false);
     let columns = args.columns.or_else(|| defaults.and_then(|d| d.columns));
     let full_width = args.full_width || defaults.and_then(|d| d.full_width).unwrap_or(false);
     let local_only = args.local_only || defaults.and_then(|d| d.local_only).unwrap_or(false);
@@ -362,6 +363,7 @@ fn main() {
     let render_options = mdcat::RenderOptions {
         margin,
         smart_punctuation,
+        emoji,
         toc,
         tabs,
     };
